@@ -1,3 +1,13 @@
+function generateRandomString() {
+  let stringList = '1234567890qwertyuiopasdfghjklzxcvbnm'
+  let randomStr = ''
+  for (let i = 0; i < 6; i++) {
+    let randomVal = Math.floor(Math.random() * stringList.length) + 1;
+    randomStr = randomStr + stringList[randomVal];
+  }
+  return randomStr;
+}
+
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
@@ -8,6 +18,14 @@ const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+
+const bodyParser = require("body-parser");
+app.use(bodyParser.urlencoded({extended: true}));
+
+app.post("/urls", (req,res) => {
+  console.log(req.body);
+  res.send("Ok")
+});
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -28,6 +46,10 @@ app.listen(PORT, () => {
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase}
   res.render("urls_index", templateVars);
+});
+
+app.get("/urls/new", (req, res) => {
+  res.render("urls_new");
 });
 
 app.get("/urls/:shortURL", (req, res) => {
