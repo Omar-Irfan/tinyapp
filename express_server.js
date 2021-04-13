@@ -24,15 +24,26 @@ const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
 app.post("/urls", (req,res) => {
-  console.log(req.body);
-  const shortURL = generateRandomString()
-  urlDatabase[shortURL] = Object.values(req.body)[0]
-  res.redirect(`/urls/${shortURL}`);
+  const short = generateRandomString()
+  urlDatabase[short] = Object.values(req.body)[0];
+  res.redirect(`/urls/${short}`);
 });
 
 app.post("/urls/:shortURL/delete", (req,res) => {
   delete urlDatabase[req.params.shortURL]
   res.redirect('/urls');
+});
+
+app.post("/urls/:shortURL", (req, res) => {
+  const short = req.params.shortURL;
+  const long = req.body.longURL;
+  urlDatabase[short] = long;
+  res.redirect('/urls');
+});
+
+app.post("/urls/:shortURL/edit", (req, res) => {
+  let short = req.params.shortURL
+  res.redirect(`/urls/${short}`)
 });
 
 app.get("/", (req, res) => {
