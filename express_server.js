@@ -38,9 +38,18 @@ const users = {
 
 app.post("/register", (req,res) => {
   const uID = generateRandomString()
-  users[uID] = req.body
-  users[uID]['id'] = uID
-  res.cookie('user_id', uID)
+  if (!req.body.email || !req.body.password) {
+    res.status(400).send('ERROR: Empty Field')
+  }
+  let email = req.body.email
+  let password = req.body.password;
+  if (emailLookUp(email, users) === email){
+    res.status(400).send('This email is already in use')
+  }
+  users[uID]['email'] = email;
+  users[uID]['password'] = password;
+  users[uID]['id'] = uID;
+  res.cookie('user_id', uID);
   res.redirect('/urls');
 });
 
@@ -50,7 +59,23 @@ const fetchUserID = (id, database) => {
       return database[userID];
     }
   } return undefined;
-}
+};
+
+const emailLookUp = (email, database) => {
+  for (let userID in database) {
+    if (database[userID]['email'] === email) {
+      return database[userID]['email'];
+    }
+  } return undefined;
+};
+
+const passwordLookUp = (password, database) => {
+  for (let userID in database) {
+    if (database[userID]['password'] === password) {
+      return database[userID]['password'];
+    }
+  } return undefined;
+};
 
 
 app.post("/urls", (req,res) => {
@@ -93,6 +118,11 @@ app.get("/", (req, res) => {
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
+
+app.get("/register.json", (req, res) => {
+  res.json(users);
+});
+
 
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
