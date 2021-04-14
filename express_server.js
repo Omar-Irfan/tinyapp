@@ -46,8 +46,7 @@ app.post("/register", (req,res) => {
   if (emailLookUp(email, users) === email){
     res.status(400).send('This email is already in use')
   }
-  users[uID]['email'] = email;
-  users[uID]['password'] = password;
+  users[uID] = req.body
   users[uID]['id'] = uID;
   res.cookie('user_id', uID);
   res.redirect('/urls');
@@ -65,14 +64,6 @@ const emailLookUp = (email, database) => {
   for (let userID in database) {
     if (database[userID]['email'] === email) {
       return database[userID]['email'];
-    }
-  } return undefined;
-};
-
-const passwordLookUp = (password, database) => {
-  for (let userID in database) {
-    if (database[userID]['password'] === password) {
-      return database[userID]['password'];
     }
   } return undefined;
 };
@@ -102,13 +93,13 @@ app.post("/urls/:shortURL/edit", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  res.cookie('username', req.body.username)
-  res.redirect('/urls');
+  req.cookies['user_id', req.body.user_id]
+  res.redirect('/login');
 });
 
 app.post("/logout", (req, res) => {
   res.clearCookie('user_id')
-  res.redirect('/urls');
+  res.redirect('/login');
 });
 
 app.get("/", (req, res) => {
@@ -137,6 +128,13 @@ app.get("/urls", (req, res) => {
   const user = fetchUserID(userID,users);
   const templateVars = { urls: urlDatabase,  user: user}
   res.render("urls_index", templateVars);
+});
+
+app.get("/login", (req,res) => {
+  const userID = req.cookies['user_id']
+  const user = fetchUserID(userID,users);
+  const templateVars = {user: user};
+  res.render("login", templateVars);
 });
 
 app.get("/register", (req, res) => {
