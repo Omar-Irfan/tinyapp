@@ -67,7 +67,23 @@ const emailLookUp = (email, database) => {
     }
   } return undefined;
 };
+const emailPasswordLookUp = (email, password, database) => {
+  for (let userID in database) {
+    if (database[userID]['email'] === email && database[userID]['password'] === password ) {
+        return database[userID]['email'];
+      }
+  } return undefined;
+};
 
+const fetchIDwEmail = (email, database) => {
+  for (let id in database) {
+    for (key in database[id]) {
+      if (key === 'email' && database[id][key] === email) {
+        return id
+      };
+    }
+  } return undefined
+}
 
 app.post("/urls", (req,res) => {
   const short = generateRandomString()
@@ -93,13 +109,19 @@ app.post("/urls/:shortURL/edit", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  req.cookies['user_id', req.body.user_id]
-  res.redirect('/login');
+  if (!emailLookUp(req.body.email, users)) {
+    res.status(403).send('Sorry there is no account with that email')
+  } if (!emailPasswordLookUp(req.body.email, req.body.password, users)) {
+    res.status(403).send('Incorrect password')
+  } if (emailPasswordLookUp(req.body.email, req.body.password, users)) {
+    let id = fetchIDwEmail(req.body.email, users)
+    res.cookie('user_id', id)
+    res.redirect('/urls'); }
 });
 
 app.post("/logout", (req, res) => {
   res.clearCookie('user_id')
-  res.redirect('/login');
+  res.redirect('/urls');
 });
 
 app.get("/", (req, res) => {
