@@ -130,8 +130,15 @@ app.post("/urls/:shortURL", (req, res) => {
 });
 
 app.post("/urls/:shortURL/edit", (req, res) => {
+  const userID = req.cookies['user_id']
+  const user = fetchUserID(userID,users);
+  const userLog = urlDatabase[req.params.shortURL]['userID']
+  if(userLog === user) {
   const short = req.params.shortURL
   res.redirect(`/urls/${short}`)
+  } else {
+    res.send('please sign in to edit')
+  }
 });
 
 app.post("/login", (req, res) => {
