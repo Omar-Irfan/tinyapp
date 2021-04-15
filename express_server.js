@@ -1,20 +1,12 @@
-function generateRandomString() {
-  let stringList = '1234567890qwertyuiopasdfghjklzxcvbnm'
-  let randomStr = ''
-  for (let i = 0; i < 6; i++) {
-    let randomVal = Math.floor(Math.random() * stringList.length) + 1;
-    randomStr = randomStr + stringList[randomVal-1];
-  }
-  return randomStr;
-}
 
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
-let cookieParser = require('cookie-parser') 
+let cookieParser = require('cookie-parser');
 const bodyParser = require("body-parser"); 
 app.use(bodyParser.urlencoded({extended: true}));
-app.use(cookieParser())
+app.use(cookieParser());
+const bcrypt = require('bcrypt');
 
 
 app.set("view engine", "ejs");
@@ -28,12 +20,12 @@ const users = {
   "userRandomID": {
     id: "userRandomID", 
     email: "user@example.com", 
-    password: "purple-monkey-dinosaur"
+    hashedPassword: "purple-monkey-dinosaur"
   },
- "user2RandomID": {
+  "user2RandomID": {
     id: "user2RandomID", 
     email: "user2@example.com", 
-    password: "omar"
+    hashedPassword: "omar"
   }
 }
 
@@ -43,15 +35,27 @@ app.post("/register", (req,res) => {
     res.status(400).send('ERROR: Empty Field')
   }
   let email = req.body.email
-  let password = req.body.password;
   if (emailLookUp(email, users) === email){
     res.status(400).send('This email is already in use')
   }
+  console.log(req.body)
   users[uID] = req.body
+  users[uID]['hashedPassword'] = bcrypt.hashSync(req.body.password, 10);
+  delete users[uID]['password'];
   users[uID]['id'] = uID;
   res.cookie('user_id', uID);
   res.redirect('/urls');
 });
+
+function generateRandomString() {
+  let stringList = '1234567890qwertyuiopasdfghjklzxcvbnm'
+  let randomStr = ''
+  for (let i = 0; i < 6; i++) {
+    let randomVal = Math.floor(Math.random() * stringList.length) + 1;
+    randomStr = randomStr + stringList[randomVal-1];
+  }
+  return randomStr;
+}
 
 const fetchUserID = (id, database) => {
   for (let userID in database) {
@@ -70,7 +74,7 @@ const emailLookUp = (email, database) => {
 };
 const emailPasswordLookUp = (email, password, database) => {
   for (let userID in database) {
-    if (database[userID]['email'] === email && database[userID]['password'] === password ) {
+    if (database[userID]['email'] === email && bcrypt.compareSync(password, database[userID]['hashedPassword'])) {
         return database[userID]['email'];
       }
   } return undefined;
