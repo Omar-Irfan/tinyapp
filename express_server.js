@@ -78,14 +78,22 @@ const emailPasswordLookUp = (email, password, database) => {
 
 const fetchIDwEmail = (email, database) => {
   for (let id in database) {
-    for (key in database[id]) {
+    for (let key in database[id]) {
       if (key === 'email' && database[id][key] === email) {
-        return id
-      };
+        return id;
+      }
     }
-  } return undefined
-}
+  } return undefined;
+};
+const urlsForUser = (id, database) => {
+  let userUrls = {}
+  for (let key in database) {
+    if (database[key].userID === id) {
+      userUrls[key] = database[key]
+    }
+  } return userUrls;
 
+};
 
 app.post("/urls", (req,res) => {
   const short = generateRandomString()
@@ -96,19 +104,33 @@ app.post("/urls", (req,res) => {
 });
 
 app.post("/urls/:shortURL/delete", (req,res) => {
-  delete urlDatabase[req.params.shortURL]
-  res.redirect('/urls');
+  const userID = req.cookies['user_id']
+  const user = fetchUserID(userID,users);
+  const userLog = urlDatabase[req.params.shortURL]['userID']
+  if(userLog === user) {
+    delete urlDatabase[req.params.shortURL]
+    res.redirect('/urls');
+  } else {
+    res.send('please sign in to delete')
+  }
 });
 
 app.post("/urls/:shortURL", (req, res) => {
-  const short = req.params.shortURL;
-  urlDatabase[short] = Object.values(req.body);
-  urlDatabase[short]['userID'] = req.cookies['user_id']
-  res.redirect('/urls');
+  const userID = req.cookies['user_id']
+  const user = fetchUserID(userID,users);
+  const userLog = urlDatabase[req.params.shortURL]['userID']
+  if(userLog === user) {
+    const short = req.params.shortURL;
+    urlDatabase[short] = Object.values(req.body);
+    urlDatabase[short]['userID'] = userID
+    res.redirect('/urls');
+  } else {
+    res.send('please sign in to edit')
+  }
 });
 
 app.post("/urls/:shortURL/edit", (req, res) => {
-  let short = req.params.shortURL
+  const short = req.params.shortURL
   res.redirect(`/urls/${short}`)
 });
 
@@ -152,7 +174,8 @@ app.listen(PORT, () => {
 app.get("/urls", (req, res) => {
   const userID = req.cookies['user_id']
   const user = fetchUserID(userID,users);
-  const templateVars = { urls: urlDatabase,  user: user}
+  const urlsToUse = urlsForUser(userID, urlDatabase)
+  const templateVars = { urls: urlsToUse,  user: user}
   res.render("urls_index", templateVars);
 });
 
@@ -187,6 +210,6 @@ app.get("/u/:shortURL", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const userID = req.cookies['user_id']
   const user = fetchUserID(userID,users);
-  const templateVars = {shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]['longURL'], user: user};
+  const templateVars = {shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]['longURL'], userID: urlDatabase[req.params.shortURL]['userID'], user: user};
   res.render("urls_show", templateVars);
 })
