@@ -80,18 +80,6 @@ app.post("/urls/:shortURL", (req, res) => {
   }
 });
 
-app.post("/urls/:shortURL/edit", (req, res) => { //linked to edit button on "/urls" page
-  const userID = req.session.user_id;
-  const currentUser = fetchUserID(userID,users);
-  const owner = urlDatabase[req.params.shortURL]['userID'];
-  if (currentUser.id === owner) { //when button is clicked and url belongs to logged on user then "/urls/:shortURL/" is accessible
-    const shortURL = req.params.shortURL;
-    res.redirect(`/urls/${shortURL}`);
-  } else { //Failsafe incase unauthorized user uses curl or other backend means to edit url
-    res.send('please sign in to edit');
-  }
-});
-
 app.post("/login", (req, res) => {
   if (!emailLookUp(req.body.email, users)) { //if email does not exist in database displays following error
     res.status(403).send('Sorry there is no account with that email');
@@ -118,9 +106,6 @@ app.get("/", (req, res) => {
   res.redirect('/login'); //if user is not logged in redirects to /login
 });
 
-app.listen(PORT, () => { //When server activates on port prints this message
-  console.log(`TinyApp server is online on port ${PORT}!`);
-});
 
 app.get("/urls", (req, res) => { //renders /urls page
   const userID = req.session.user_id;
@@ -162,23 +147,27 @@ app.get("/urls/new", (req, res) => { //renders /urls/new page
 
 app.get("/u/:shortURL", (req, res) => { //clicking or typing short url link redirects user to long url destination
   if (!urlDatabase[req.params.shortURL]) { //if short url doesn't exist, displays error
-    res.status(404).send('404 Error: Page not Found');
-  }
-  const longURL = urlDatabase[req.params.shortURL]['longURL'];
-  res.redirect(longURL); //if short url exist then user is redirected to corresponding long url
+  res.status(404).send('404 Error: Page not Found');
+}
+const longURL = urlDatabase[req.params.shortURL]['longURL'];
+res.redirect(longURL); //if short url exist then user is redirected to corresponding long url
 });
 
-app.get("/urls/:shortURL", (req, res) => { //renders page for each individual short url
+app.get("/urls/:shortURL", (req, res) => { //renders page for each individual short url, also linked to edit button 
   const currentUserID = req.session.user_id;
   const currentUser = fetchUserID(currentUserID,users);
   if (!urlDatabase[req.params.shortURL]) { //if short url doesn't exist displays 404 error
-    res.status(404).send('404 Error: Page not Found');
-  }
-  const owner = urlDatabase[req.params.shortURL]['userID'];
-  if (!currentUserID) { //if not logged in, displays error that user is not lgged in
-    res.status(400).send('You are not logged in');
-  } if (currentUser.id !== owner) { //if logged in but url does not belong to current user then error is displayed
-    res.status(400).send('This URL does not belong to you');
-  } const templateVars = {shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]['longURL'], userID: urlDatabase[req.params.shortURL]['userID'], user: currentUser};
-  res.render("urls_show", templateVars); //if logged in and url belongs to current user then page is shown
+  res.status(404).send('404 Error: Page not Found');
+}
+const owner = urlDatabase[req.params.shortURL]['userID'];
+if (!currentUserID) { //if not logged in, displays error that user is not lgged in
+  res.status(400).send('You are not logged in');
+} if (currentUser.id !== owner) { //if logged in but url does not belong to current user then error is displayed
+  res.status(400).send('This URL does not belong to you');
+} const templateVars = {shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]['longURL'], userID: urlDatabase[req.params.shortURL]['userID'], user: currentUser};
+res.render("urls_show", templateVars); //if logged in and url belongs to current user then page is shown
+});
+
+app.listen(PORT, () => { //When server activates on port prints this message
+  console.log(`TinyApp server is online on port ${PORT}!`);
 });
