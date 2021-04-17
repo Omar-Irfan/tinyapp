@@ -16,30 +16,27 @@ const urlDatabase = {};
 const users = {};
 
 app.post("/register", (req,res) => {
-  const uID = generateRandomString(); 
+  const uID = generateRandomString();
   if (!req.body.email || !req.body.password) { //if either field is empty on registration page returns error
     res.status(400).send('ERROR: Empty Field');
     return;
   }
-  let email = req.body.email;
-  if (emailLookUp(email, users) === email) { // if email is already in use, returns error
+  if (emailLookUp(req.body.email, users) === req.body.email) { // if email is already in use, returns error
     res.status(400).send('This email is already in use');
     return;
   } //creates new user id for corresponding email and password encrypts user password sets a cookie and redirects to /urls
-  users[uID] = req.body;
-  users[uID]['hashedPassword'] = bcrypt.hashSync(req.body.password, 10);
-  delete users[uID]['password'];
-  users[uID]['id'] = uID;
+  let user = {id: uID, email: req.body.email, hashedPassword: bcrypt.hashSync(req.body.password, 10)};
+  users[uID] = user;
   req.session.user_id = uID;
   res.redirect('/urls');
-  return; 
+  return;
 });
 
 app.post("/urls", (req,res) => { //renders /urls page
   const short = generateRandomString(); //generates random string to represent short url
   urlDatabase[short] = req.body; //adds random string as object in urlDatabase and gives it corresponding long url and user id
   urlDatabase[short]['userID'] = req.session.user_id;
-  res.redirect(`/urls/${short}`); 
+  res.redirect(`/urls/${short}`);
   return; //redirects to page using random string as part of url
 
 });
@@ -130,7 +127,7 @@ app.get("/login", (req,res) => { //renders login page
   const currentUser = fetchUserID(currentUserID,users);
   const templateVars = {user: currentUser};
   if (currentUser) {
-    res.redirect("/urls"); 
+    res.redirect("/urls");
     return; //if user is logged on, redirects to /urls
   }
   res.render("login", templateVars);
@@ -162,31 +159,31 @@ app.get("/urls/new", (req, res) => { //renders /urls/new page
 
 app.get("/u/:shortURL", (req, res) => { //clicking or typing short url link redirects user to long url destination
   if (!urlDatabase[req.params.shortURL]) { //if short url doesn't exist, displays error
-  res.status(404).send('404 Error: Page not Found');
-  return;
-}
-const longURL = urlDatabase[req.params.shortURL]['longURL'];
-res.redirect(longURL);
-return; //if short url exist then user is redirected to corresponding long url
+    res.status(404).send('404 Error: Page not Found');
+    return;
+  }
+  const longURL = urlDatabase[req.params.shortURL]['longURL'];
+  res.redirect(longURL);
+  return; //if short url exist then user is redirected to corresponding long url
 });
 
-app.get("/urls/:shortURL", (req, res) => { //renders page for each individual short url, also linked to edit button 
+app.get("/urls/:shortURL", (req, res) => { //renders page for each individual short url, also linked to edit button
   const currentUserID = req.session.user_id;
   const currentUser = fetchUserID(currentUserID,users);
   if (!urlDatabase[req.params.shortURL]) { //if short url doesn't exist displays 404 error
-  res.status(404).send('404 Error: Page not Found');
-  return;
-}
-const owner = urlDatabase[req.params.shortURL]['userID'];
-if (!currentUserID) { //if not logged in, displays error that user is not lgged in
-  res.status(400).send('You are not logged in');
-  return;
-} if (currentUser.id !== owner) { //if logged in but url does not belong to current user then error is displayed
-  res.status(400).send('This URL does not belong to you');
-  return;
-} const templateVars = {shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]['longURL'], userID: urlDatabase[req.params.shortURL]['userID'], user: currentUser};
-res.render("urls_show", templateVars);
-return; //if logged in and url belongs to current user then page is shown
+    res.status(404).send('404 Error: Page not Found');
+    return;
+  }
+  const owner = urlDatabase[req.params.shortURL]['userID'];
+  if (!currentUserID) { //if not logged in, displays error that user is not lgged in
+    res.status(400).send('You are not logged in');
+    return;
+  } if (currentUser.id !== owner) { //if logged in but url does not belong to current user then error is displayed
+    res.status(400).send('This URL does not belong to you');
+    return;
+  } const templateVars = {shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]['longURL'], userID: urlDatabase[req.params.shortURL]['userID'], user: currentUser};
+  res.render("urls_show", templateVars);
+  return; //if logged in and url belongs to current user then page is shown
 });
 
 app.listen(PORT, () => { //When server activates on port prints this message
