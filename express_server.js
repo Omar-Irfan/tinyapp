@@ -8,7 +8,6 @@ const bcrypt = require('bcrypt'); //imports bcrypt middleware
 const cookieSession = require('cookie-session'); //imports cookie-session middleware
 app.use(cookieSession({name: 'user_id',
   keys: ['fyfyufjkfyfysedt', 'ftfjhfgfhgvj'],})); //set encryption key for cookie session
-
 app.set("view engine", "ejs"); //sets engine
 
 const urlDatabase = {}; //Database of original urls and their corresponding short urls
