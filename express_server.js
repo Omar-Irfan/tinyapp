@@ -11,9 +11,9 @@ app.use(cookieSession({name: 'user_id',
 
 app.set("view engine", "ejs"); //sets engine
 
-const urlDatabase = {};
+const urlDatabase = {}; //Database of original urls and their corresponding short urls
 
-const users = {};
+const users = {}; //Database of user accounts
 
 app.post("/register", (req,res) => {
   const uID = generateRandomString();
