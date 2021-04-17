@@ -1,5 +1,5 @@
 <header>
-  <nav class="navbar navbar-expand-md navbar-dark bg-success">
+  <nav class="navbar navbar-expand-md navbar-dark bg-info">
     <a class="navbar-brand" href="/urls">TinyApp</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -11,7 +11,7 @@
         <%if(user) {%>
         <a class="nav-item nav-link"> Logged in as <%=user.email%></a>
         <form action="/logout" method="POST">
-          <button type="submit" class="btn btn-dark">Logout</a> 
+          <button type="submit" class="btn btn-outline-light">Logout</a> 
         </form>
         <%} else {%>
         <form action="/login" method="POST">
