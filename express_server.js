@@ -11,23 +11,9 @@ app.use(cookieSession({name: 'user_id',
 
 app.set("view engine", "ejs"); //sets engine
 
-const urlDatabase = {
-  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
-  i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" }
-};
+const urlDatabase = {};
 
-const users = {
-  "userRandomID": {
-    id: "userRandomID",
-    email: "user@example.com",
-    hashedPassword: bcrypt.hashSync('omar', 10)
-  },
-  "user2RandomID": {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    hashedPassword: bcrypt.hashSync('omar', 10)
-  }
-};
+const users = {};
 
 app.post("/register", (req,res) => {
   const uID = generateRandomString(); 
