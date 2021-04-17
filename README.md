@@ -8,7 +8,7 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 !["Create a Tiny URL here!"](https://github.com/Omar-Irfan/tinyapp/blob/master/docs/CreateTinyURLPage.png?raw=true)
 
-!["Access all your URLs here!"](https://github.com/Omar-Irfan/tinyapp/blob/master/docs/MyUrlsPage.png?raw=true)
+!["Access all your URLs here!"](https://github.com/Omar-Irfan/tinyapp/blob/a785044cc1467a1e4cc4e1266137c1b765029636/docs/MyUrlsPage.png?raw=true)
 
 
 ## Dependencies
