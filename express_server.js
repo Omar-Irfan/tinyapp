@@ -24,7 +24,7 @@ app.post("/register", (req,res) => {
     res.status(400).send('This email is already in use');
     return;
   } //creates new user id for corresponding email and password encrypts user password sets a cookie and redirects to /urls
-  let user = {id: uID, email: req.body.email, hashedPassword: bcrypt.hashSync(req.body.password, 10)};
+  const user = {id: uID, email: req.body.email, hashedPassword: bcrypt.hashSync(req.body.password, 10)};
   users[uID] = user;
   req.session.user_id = uID;
   res.redirect('/urls');
@@ -68,7 +68,7 @@ app.post("/urls/:shortURL", (req, res) => {
   }
   if (currentUser.id === owner) { //if user is logged in and owns url then allows updating url and redirects to /urls
     const shortURL = req.params.shortURL;
-    urlDatabase[shortURL] = Object.values(req.body);
+    urlDatabase[shortURL]['longURL'] = Object.values(req.body);
     urlDatabase[shortURL]['userID'] = userID;
     res.redirect('/urls');
     return;
@@ -86,7 +86,7 @@ app.post("/login", (req, res) => {
     res.status(403).send('Incorrect password');
     return;
   } if (emailPasswordLookUp(req.body.email, req.body.password, users)) { //if both email address and password are valid prints
-    let id = fetchIDwEmail(req.body.email, users);
+    const id = fetchIDwEmail(req.body.email, users);
     req.session.user_id = id;
     res.redirect('/urls');
     return;
